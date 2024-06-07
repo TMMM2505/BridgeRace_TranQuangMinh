@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class Finish : MonoBehaviour
 {
+    private BoxCollider bCol;
     private int win = 2;
+    private void Start()
+    {
+        bCol = GetComponent<BoxCollider>();
+    }
     private void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.CompareTag(Constants.tagBot))
@@ -19,5 +24,14 @@ public class Finish : MonoBehaviour
     public int Win()
     {
         return win;
+    }
+
+    public void ResetCheckWin(int win)
+    {
+        this.win = win;
+    }
+    public void ResetGoal()
+    {
+        bCol.isTrigger = true;
     }
 }

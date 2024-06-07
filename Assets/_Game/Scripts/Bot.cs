@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 
 public class Bot : Character
 {
+    [SerializeField] private LayerMask platformLayer;
     private IState currentState;
     private Vector3 finalGoal;
     private Vector3 goal;
@@ -28,34 +29,39 @@ public class Bot : Character
     }
     private void Start()
     {
-        rd = GetComponent<Renderer>();
-        agent.speed = speed;
-        ChangeState(new IdleState());
+        if(active)
+        {
+            rd = GetComponent<Renderer>();
+            agent.speed = speed;
+            ChangeState(new RunState());
+            //FindPlatform();
+        }
     }
     private void Update()
     {
-        //if(active)
+        if(active)
         {
-            if(Vector3.Distance(trans.position, goal) < 1f)
+            /*if(Vector3.Distance(trans.position, goal) < 0.5f)
             {
                 targetBrick[savingIndex] += new Vector3(999f, 999f, 999f);
                 StartCoroutine(ReAppear(3f));
-            }
+            }*/
             //len cau & xuong cau
             if (count >= 15 || count == 0)
             {
                 savingCount = count;
+                ChangeState(new RunState());
             }
-            ChangeState(new RunState());
+            currentState.OnExecute(this);
         }
-        currentState.OnExecute(this);
     }
     public void OnInit(ColorEnum color, Map map, Vector3 finalGoal)
     {
         setColor(color);
         currentMap = map;
+        //FindPlatform();
         currentPlatform = currentMap.getPlatform()[0];
-        
+
         targetBrick.Clear();
         for(int i = 0; i < currentPlatform.getTarget().Count; i++)
         {
@@ -80,7 +86,6 @@ public class Bot : Character
     public override void OnBridge(Collider item)
     {
         Stair stair = Dictionary.instance.vachamStair(item);
-        Debug.Log("up stair");
         if (stair != null)
         {
             if(stair.GetMaterial().color != rd.material.color)
@@ -125,11 +130,6 @@ public class Bot : Character
         agent.speed = 5;
         ChangeAnim("Brun");
     }
-    IEnumerator ReAppear(float time)
-    {
-        yield return new WaitForSeconds(time);
-        targetBrick[savingIndex] -= new Vector3(999f, 999f, 999f);
-    }
 
     public void setGoal(Vector3 goal)
     {
@@ -148,34 +148,60 @@ public class Bot : Character
         }
     }
 
+/*    private void FindPlatform()
+    {
+        RaycastHit hit;
+        Physics.Raycast(trans.position, Vector3.down, out hit, platformLayer);
+        if(hit.collider != null)
+        {
+            if (hit.collider.gameObject.CompareTag(Constants.tagPlatform1))
+            {
+                Debug.Log("pf1");
+                currentPlatform = currentMap.getPlatform()[0];
+            }
+            else if (hit.collider.gameObject.CompareTag(Constants.tagPlatform2))
+            {
+                Debug.Log("pf2");
+                currentPlatform = currentMap.getPlatform()[1];
+            }
+        }
+        else
+        {
+            Debug.Log("null");
+        }
+    }*/
     private void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        if (other.gameObject.CompareTag(Constants.tagSubGoal))
+        Brick brick = Dictionary.instance.vachamBrick(other);
+
+        if(brick != null)
         {
-            // chuyen platform
-            for (int i = 0; i < currentPlatform.getTarget().Count; i++)
+            if (brick.color == color)
             {
-                Brick item = currentPlatform.getTarget()[i];
-                if (item.color == color)
-                {
-                    targetBrick.Add(currentPlatform.getTarget()[i].transform.position);
-                }
+                targetBrick[savingIndex] += new Vector3(999f, 999f, 999f);
+                StartCoroutine(ReAppear(3f, savingIndex));
+                FindMinTarget();
             }
         }
+        
         if (other.gameObject.CompareTag(Constants.tagFinalGoal))
         {
-            currentState.OnExit(this);
+            ChangeState(new IdleState());
         }
     }
 
+    IEnumerator ReAppear(float time, int index)
+    {
+        yield return new WaitForSeconds(time);
+        targetBrick[index] -= new Vector3(999f, 999f, 999f);
+    }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag(Constants.tagSubGoal))
+        if (other.gameObject.CompareTag(Constants.tagDoor) && touchDoor)
         {
-            savingCount = 0;
-            ChangeState(new RunState());
-            other.GetComponent<BoxCollider>().isTrigger = false;
+            touchDoor = false;
+            // chuyen platform
             targetBrick.Clear();
             for (int i = 0; i < currentPlatform.getTarget().Count; i++)
             {
@@ -185,22 +211,27 @@ public class Bot : Character
                     targetBrick.Add(currentPlatform.getTarget()[i].transform.position);
                 }
             }
+            savingCount = 0;
+            ChangeState(new RunState());
+            other.GetComponent<BoxCollider>().isTrigger = false;
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         base.OnCollisionEnter(collision);
-        if(collision.gameObject.CompareTag(Constants.tagPlatform1))
+        if (collision.gameObject.CompareTag(Constants.tagPlatform1))
         {
-            Debug.Log("P1");
             currentPlatform = currentMap.getPlatform()[0];
         }
         else if (collision.gameObject.CompareTag(Constants.tagPlatform2))
         {
-            Debug.Log("P2");
             currentPlatform = currentMap.getPlatform()[1];
         }
-
+    }
+    public void SetActive(bool active)
+    {
+        this.active = active;
+        ChangeAnim("Bidle");
     }
 }

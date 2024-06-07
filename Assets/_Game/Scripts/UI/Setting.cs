@@ -15,4 +15,6 @@ public class Set : UICanvas
         LevelManager.Ins.ResetLV();
         UIManager.Ins.OpenUI<MainMenu>();
     }
+
+
 }

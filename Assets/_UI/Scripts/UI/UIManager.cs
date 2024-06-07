@@ -57,10 +57,8 @@ public class UIManager : Singleton<UIManager>
     public T OpenUI<T>() where T : UICanvas
     {
         UICanvas canvas = GetUI<T>();
-
         canvas.Setup();
         canvas.Open();
-        //gameManager.Ins.addListUI(canvas);
         return canvas as T;
     }
 

@@ -6,11 +6,10 @@ using UnityEngine;
 
 public class gameManager : Singleton<gameManager>
 {
+    [SerializeField] private Finish finalGoal;
     public static gameManager instance;
 
-    private List<UICanvas> listUI = new List<UICanvas>();
-    private bool finish = true;
-
+    private bool showEG = true;
     private void Awake()
     {
         instance = this;
@@ -22,15 +21,36 @@ public class gameManager : Singleton<gameManager>
     }
     private void Update()
     {
-        if (LevelManager.instance.Result() == 1 && finish)
+        if(showEG)
         {
-            finish = false;
-            Victory();
-        }
-        if (LevelManager.instance.Result() == 0 && finish)
-        {
-            finish = false;
-            Defeat();
+            int index = LevelManager.instance.GetIndexMap();
+            if(index < 2)
+            {
+                if (finalGoal.Win() == 1)
+                {
+                    showEG = false;
+                    Victory();
+                    LevelManager.instance.SetActiveChar(false);
+                    finalGoal.ResetGoal();
+                }
+                if (finalGoal.Win() == 0)
+                {
+                    showEG = false;
+                    Defeat();
+                    LevelManager.instance.SetActiveChar(false);
+                    finalGoal.ResetGoal();
+                }
+                finalGoal.ResetCheckWin(2);
+                if(index < 2)
+                {
+                    LevelManager.instance.SetIndexMap(index++);
+                }
+            }
+            else
+            {
+                UIManager.Ins.OpenUI<TextEG>();
+                LevelManager.instance.SetActiveChar(false);
+            }
         }
     }
 
@@ -44,17 +64,10 @@ public class gameManager : Singleton<gameManager>
         UIManager.Ins.OpenUI<EndGame>();
         UIManager.Ins.OpenUI<Victory>();
     }
-/*    public void addListUI(UICanvas newUI)
+
+    public void SetCheckFinish(bool check)
     {
-        listUI.Add(newUI);
+        showEG = check;
     }
 
-    public void CloseAllUI()
-    {
-        for(int i = 0; i < listUI.Count; i++)
-        {
-            Debug.Log("xoa UI");
-            Destroy(listUI[i]);
-        }
-    }*/
 }

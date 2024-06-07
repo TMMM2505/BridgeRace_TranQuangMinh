@@ -9,12 +9,12 @@ TagManager:
   - Stair
   - Brick
   - Wall
-  - SubGoal
   - FinalGoal
   - green
   - Platform1
   - Platform2
   - Platform3
+  - Door
   layers:
   - Default
   - TransparentFX

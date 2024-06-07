@@ -8,12 +8,14 @@ public class MainMenu : UICanvas
     {
         UIManager.Ins.setJsPanel(true);
         //Character.instance.setActive(true);
-        LevelManager.instance.LVOnInit();
+        //LevelManager.instance.LVOnInit();
+        LevelManager.instance.SetActiveChar(true);
         Close(0);
     }
 
     public void SettingButton()
     {
+        UIManager.Ins.CloseAll();
         UIManager.Ins.OpenUI<Set>();
     }
 

@@ -967,6 +967,9 @@ MonoBehaviour:
   anim: {fileID: 3259070621421202788}
   rb: {fileID: 4673362029122186859}
   speed: 5
+  platformLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &8891139753750894140
 GameObject:
   m_ObjectHideFlags: 0

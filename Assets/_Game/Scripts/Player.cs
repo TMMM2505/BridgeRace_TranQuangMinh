@@ -15,23 +15,29 @@ public class Player : Character
     public void OnInit()
     {
         trans.position = new Vector3(0, 0, -10f);
-        for(int i = 0; i < characterBricks.Count; i++)
+        if(characterBricks.Count > 0)
         {
-            Destroy(characterBricks[i].gameObject);
+            for(int i = 0; i < characterBricks.Count; i++)
+            {
+                if (characterBricks[i] != null)
+                {
+                    Destroy(characterBricks[i].gameObject);
+                }
+            }
         }
         count = 0;
     }
 
     void Update()
     {
-        /*if (!active)
-        {
-            speed = 0;
-        }
-        else*/
+        if (active)
         {
             speed = 650;
             Move();
+        }
+        else
+        {
+            trans.GetComponent<Rigidbody>().useGravity = false;
         }
     }
 
@@ -85,9 +91,13 @@ public class Player : Character
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag(Constants.tagSubGoal))
+        if(touchDoor)
         {
-            other.GetComponent<BoxCollider>().isTrigger = false;
+            touchDoor = false;
+            if (other.gameObject.CompareTag(Constants.tagDoor))
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
         }
     }
     private void checkGround()
@@ -97,4 +107,8 @@ public class Player : Character
         trans.position = hit.point + new Vector3(0, 1f, 0);
     }
 
+    public void SetActive(bool active)
+    {
+        this.active = active;
+    }
 }

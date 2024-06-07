@@ -22,6 +22,7 @@ public class Character : MonoBehaviour
     protected string currentAnim;
     protected string cl;
     protected bool active;
+    protected bool touchDoor = true;
     private void Awake()
     {
         instance = this;
@@ -70,13 +71,6 @@ public class Character : MonoBehaviour
             OnBridge(other.collider);
         }
     }
-    public virtual void OnBridge(Collider item)
-    {
+    public virtual void OnBridge(Collider item){}
 
-    }
-
-    public void setActive(bool active)
-    {
-        this.active = active;
-    }    
 }
