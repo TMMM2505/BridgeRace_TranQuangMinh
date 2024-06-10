@@ -54,6 +54,7 @@ public class Bot : Character
             }
             currentState.OnExecute(this);
         }
+        Debug.Log(count);
     }
     public void OnInit(ColorEnum color, Map map, Vector3 finalGoal)
     {

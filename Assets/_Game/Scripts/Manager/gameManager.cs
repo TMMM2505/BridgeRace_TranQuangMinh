@@ -24,7 +24,7 @@ public class gameManager : Singleton<gameManager>
         if(showEG)
         {
             int index = LevelManager.instance.GetIndexMap();
-            if(index < 2)
+            if(index < 3)
             {
                 if (finalGoal.Win() == 1)
                 {
@@ -40,16 +40,16 @@ public class gameManager : Singleton<gameManager>
                     LevelManager.instance.SetActiveChar(false);
                     finalGoal.ResetGoal();
                 }
+                if((finalGoal.Win() == 1 || finalGoal.Win() == 0) && index == 2)
+                {
+                    UIManager.Ins.OpenUI<TextEG>();
+                    LevelManager.instance.SetActiveChar(false);
+                }
                 finalGoal.ResetCheckWin(2);
-                if(index < 2)
+                if(index <= 2)
                 {
                     LevelManager.instance.SetIndexMap(index++);
                 }
-            }
-            else
-            {
-                UIManager.Ins.OpenUI<TextEG>();
-                LevelManager.instance.SetActiveChar(false);
             }
         }
     }

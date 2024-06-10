@@ -39,7 +39,7 @@ public class LevelManager : Singleton<LevelManager>
     public void SetColorForCharacter()
     {
         player.setColor((ColorEnum)1);
-        for (int i = 2; i <= 4; i++)
+        for (int i = 2; i <= 2; i++)
         {
             Bot ibot = bot;
             ibot = Instantiate(ibot, new Vector3(i * 2, -3f, -10f), Quaternion.identity);
