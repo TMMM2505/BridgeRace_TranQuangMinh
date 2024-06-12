@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class Player : Character
 {
-    [SerializeField] private Joystick js;
-
+    private Joystick js;
     void Start()
     {
         trans = this.transform;
         rd = GetComponent<Renderer>();
     }
 
-    public void OnInit()
+    public void OnInit(Vector3 startPoint, Joystick js, ColorEnum color)
     {
-        trans.position = new Vector3(0, 0, -10f);
+        setColor(color);
+        transform.position = startPoint;
         if(characterBricks.Count > 0)
         {
             for(int i = 0; i < characterBricks.Count; i++)
@@ -26,49 +26,44 @@ public class Player : Character
             }
         }
         count = 0;
+        this.js = js;
     }
 
     void Update()
     {
-        if (active)
+        if(active)
         {
-            speed = 650;
+            speed = 750;
             Move();
         }
-        else
-        {
-            trans.GetComponent<Rigidbody>().useGravity = false;
-        }
+        else ChangeAnim("idle");
     }
 
     private void Move()
     {
         float x = js.Horizontal;
         float z = js.Vertical;
-        /*float x, z;
-        x = Input.GetAxisRaw("Horizontal");
-        z = Input.GetAxisRaw("Vertical");*/
         if (Mathf.Abs(x) > 0.1f || Mathf.Abs(z) > 0.1f)
         {
             rb.velocity = new Vector3(x, 0, z).normalized * speed * Time.deltaTime;
             trans.forward = rb.velocity;
             ChangeAnim("run");
+            CheckGround();
         }
         else ChangeAnim("idle");
-        checkGround();
     }
     public override void OnBridge(Collider item)
     {
         RaycastHit hit;
         Physics.Raycast(transform.position + ((trans.GetComponent<Rigidbody>().velocity.z > 0) ? new Vector3(0, 0, 1f) : new Vector3(0, 0, -1f)), transform.TransformDirection(Vector3.down), out hit, 10f);
-        Stair stair = Dictionary.instance.vachamStair(item);
+        Stair stair = CacheDictionary.instance.vachamStair(item);
         if(stair != null)
         {
             if (hit.collider.GetComponent<MeshRenderer>().material.color != rd.material.color)
             {
                 if (count > 0)
                 {
-                    speed = 700;
+                    speed = 800;
                     stair.ChangeColor(rd.material);
                     Destroy(trans.GetChild(trans.childCount - 1).gameObject);
                     count--;
@@ -77,38 +72,53 @@ public class Player : Character
                 {
                     transform.position -= new Vector3(0, 0, 0.3f);
                 }
-                else speed = 600;
-            }
-            if (trans.position.z < 0)
-            {
-                checkGround();
+                else speed = 750;
             }
         }
+    }
+    private void CheckGround()
+    {
+        RaycastHit hit;
+        Physics.Raycast(trans.position, Vector3.down, out hit, 5f);
+        if(!hit.collider.gameObject.CompareTag(Constants.tagBrick))
+            trans.position = hit.point + new Vector3(0, 1f, 0);
+    }
+    public override void SetActive(bool active)
+    {
+        this.active = active;
     }
     private void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if(touchDoor)
+        if (other.gameObject.CompareTag(Constants.tagDoor))
         {
-            touchDoor = false;
-            if (other.gameObject.CompareTag(Constants.tagDoor))
+            if (rb.velocity.z < 0f)
             {
                 other.GetComponent<BoxCollider>().isTrigger = false;
             }
         }
     }
-    private void checkGround()
+    private void OnTriggerExit(Collider other)
     {
-        RaycastHit hit;
-        Physics.Raycast(trans.position, Vector3.down, out hit, 5f);
-        trans.position = hit.point + new Vector3(0, 1f, 0);
+        if (other.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (rb.velocity.z > 0f)
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
+        }
     }
-
-    public void SetActive(bool active)
+    private void OnCollisionEnter(Collision collision)
     {
-        this.active = active;
+        base.OnCollisionEnter(collision);
+        if (collision.gameObject.CompareTag(Constants.tagDoor))
+        {
+            Debug.Log("va cham");
+            if (rb.velocity.z >= 0f)
+            {
+                Debug.Log("pass Coli");
+                collision.collider.GetComponent<BoxCollider>().isTrigger = true;
+            }
+        }
     }
 }

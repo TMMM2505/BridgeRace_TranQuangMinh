@@ -11,4 +11,11 @@ public class InPlaying : UICanvas
         UIManager.Ins.OpenUI<Pause>();
         Close(0);
     }
+    public void SettingButton()
+    {
+        Close(0);
+        Time.timeScale = 0f;
+        UIManager.Ins.SetLastCanvas(this);
+        UIManager.Ins.OpenUI<Set>();
+    }
 }

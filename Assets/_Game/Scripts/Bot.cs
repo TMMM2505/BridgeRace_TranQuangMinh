@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ public class Bot : Character
     private float[] dis = new float[41];
 
     private List<Vector3> targetBrick = new List<Vector3>();
+    private int needAmount;
 
     private void Awake()
     {
@@ -29,13 +31,10 @@ public class Bot : Character
     }
     private void Start()
     {
-        if(active)
-        {
-            rd = GetComponent<Renderer>();
-            agent.speed = speed;
-            ChangeState(new RunState());
-            //FindPlatform();
-        }
+        rd = GetComponent<Renderer>();
+        agent.speed = speed;
+        ChangeState(new RunState());
+        //FindPlatform();
     }
     private void Update()
     {
@@ -47,14 +46,17 @@ public class Bot : Character
                 StartCoroutine(ReAppear(3f));
             }*/
             //len cau & xuong cau
-            if (count >= 15 || count == 0)
+            if (count >= needAmount || count == 0)
             {
                 savingCount = count;
                 ChangeState(new RunState());
             }
             currentState.OnExecute(this);
         }
-        Debug.Log(count);
+        else
+        {
+            currentState.OnExit(this);
+        }
     }
     public void OnInit(ColorEnum color, Map map, Vector3 finalGoal)
     {
@@ -72,6 +74,7 @@ public class Bot : Character
                 targetBrick.Add(currentPlatform.getTarget()[i].transform.position);
             }
         }
+        needAmount = UnityEngine.Random.Range(10, 15);
 
         this.finalGoal = finalGoal;
     }
@@ -86,7 +89,7 @@ public class Bot : Character
 
     public override void OnBridge(Collider item)
     {
-        Stair stair = Dictionary.instance.vachamStair(item);
+        Stair stair = CacheDictionary.instance.vachamStair(item);
         if (stair != null)
         {
             if(stair.GetMaterial().color != rd.material.color)
@@ -102,6 +105,7 @@ public class Bot : Character
                 {
                     agent.speed = 0;
                     FindMinTarget();
+                    needAmount = UnityEngine.Random.Range(10, 15);
                 }
             }
             else
@@ -149,32 +153,10 @@ public class Bot : Character
         }
     }
 
-/*    private void FindPlatform()
-    {
-        RaycastHit hit;
-        Physics.Raycast(trans.position, Vector3.down, out hit, platformLayer);
-        if(hit.collider != null)
-        {
-            if (hit.collider.gameObject.CompareTag(Constants.tagPlatform1))
-            {
-                Debug.Log("pf1");
-                currentPlatform = currentMap.getPlatform()[0];
-            }
-            else if (hit.collider.gameObject.CompareTag(Constants.tagPlatform2))
-            {
-                Debug.Log("pf2");
-                currentPlatform = currentMap.getPlatform()[1];
-            }
-        }
-        else
-        {
-            Debug.Log("null");
-        }
-    }*/
     private void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        Brick brick = Dictionary.instance.vachamBrick(other);
+        Brick brick = CacheDictionary.instance.vachamBrick(other);
 
         if(brick != null)
         {
@@ -189,6 +171,17 @@ public class Bot : Character
         if (other.gameObject.CompareTag(Constants.tagFinalGoal))
         {
             ChangeState(new IdleState());
+        }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (other.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct < 0f)
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
         }
     }
 
@@ -216,6 +209,17 @@ public class Bot : Character
             ChangeState(new RunState());
             other.GetComponent<BoxCollider>().isTrigger = false;
         }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (other.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct > 0f)
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -229,10 +233,25 @@ public class Bot : Character
         {
             currentPlatform = currentMap.getPlatform()[1];
         }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (collision.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct > 0f)
+            {
+                collision.collider.GetComponent<BoxCollider>().isTrigger = true;
+            }
+        }
     }
-    public void SetActive(bool active)
+    public override void SetActive(bool active)
     {
         this.active = active;
         ChangeAnim("Bidle");
+    }
+    public int getNeedAmount()
+    {
+        return needAmount;
     }
 }

@@ -967,6 +967,7 @@ MonoBehaviour:
   anim: {fileID: 3259070621421202788}
   rb: {fileID: 4673362029122186859}
   speed: 5
+  skin: {fileID: 3053163503780375121}
   platformLayer:
     serializedVersion: 2
     m_Bits: 8

@@ -76,7 +76,8 @@ public class Platform : MonoBehaviour
     {
         for(int i = 0; i < listBrick.Count; i++) 
         {
-            Destroy(listBrick[i].gameObject);
+            if (listBrick[i] != null)
+                Destroy(listBrick[i].gameObject);
         }
     }
     public List<Brick> getTarget()

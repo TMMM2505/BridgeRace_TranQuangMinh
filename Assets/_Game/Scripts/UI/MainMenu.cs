@@ -6,22 +6,21 @@ public class MainMenu : UICanvas
 {
     public void StartButton()
     {
-        UIManager.Ins.setJsPanel(true);
-        //Character.instance.setActive(true);
-        //LevelManager.instance.LVOnInit();
+        Time.timeScale = 1f;
         LevelManager.instance.SetActiveChar(true);
+        UIManager.Ins.setJsPanel(true);
         Close(0);
     }
 
     public void SettingButton()
     {
-        UIManager.Ins.CloseAll();
         UIManager.Ins.OpenUI<Set>();
+        UIManager.Ins.SetLastCanvas(this);
+        Close(0);
     }
 
     public void ExitButton()
     {
         UnityEditor.EditorApplication.isPlaying = false;
     }
-
 }

@@ -10,11 +10,16 @@ public class CameraFollower : MonoBehaviour
 
     void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void FixedUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, target.position + offset, Time.deltaTime * speed);
+        if(target != null)
+        {
+            transform.position = Vector3.Lerp(transform.position, target.position + offset, Time.deltaTime * speed);
+        }
+        else{
+            target = GameObject.FindGameObjectWithTag("Player").transform;
+        }
     }
 }

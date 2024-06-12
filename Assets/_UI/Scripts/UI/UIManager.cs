@@ -22,6 +22,7 @@ using UnityEngine.Events;
 public class UIManager : Singleton<UIManager>
 {
     [SerializeField] private GameObject JsPanel;
+
     //dict for quick query UI prefab
     //dict dung de lu thong tin prefab canvas truy cap cho nhanh
     private Dictionary<System.Type, UICanvas> uiCanvasPrefab = new Dictionary<System.Type, UICanvas>();
@@ -37,6 +38,7 @@ public class UIManager : Singleton<UIManager>
     //canvas container, it should be a canvas - root
     //canvas chua dung cac canvas con, nen la mot canvas - root de chua cac canvas nay
     public Transform CanvasParentTF;
+    public UICanvas LastCanvas;
 
     public void setJsPanel(bool turnon)
     {
@@ -54,12 +56,27 @@ public class UIManager : Singleton<UIManager>
 
     //open UI
     //mo UI canvas
+    /*public void Defeat()
+    {
+        OpenUI<EndGame>();
+        OpenUI<Defeat>();
+    }
+    public void Victory()
+    {
+        OpenUI<EndGame>();
+        OpenUI<Victory>();
+    }*/
     public T OpenUI<T>() where T : UICanvas
     {
         UICanvas canvas = GetUI<T>();
         canvas.Setup();
         canvas.Open();
         return canvas as T;
+    }
+
+    public void SetLastCanvas(UICanvas uiCanvas)
+    {
+        LastCanvas = uiCanvas;
     }
 
     //close UI directly

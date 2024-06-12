@@ -8,8 +8,8 @@ public class EndGame : UICanvas
     {
         UIManager.Ins.CloseAll();
         LevelManager.Ins.ResetLV();
-        gameManager.instance.SetCheckFinish(true);
         LevelManager.Ins.LVOnInit();
+        Time.timeScale = 1f;
         UIManager.Ins.OpenUI<MainMenu>();
     }
     public void ExitButton()
@@ -20,18 +20,24 @@ public class EndGame : UICanvas
     public void NextLVButton()
     {
         int index = LevelManager.instance.GetIndexMap();
-        if(index < 2)
+        if(index <= 2)
         {
             UIManager.Ins.CloseAll();
             LevelManager.Ins.ResetLV();
 
             LevelManager.instance.TurnOffCurrentMap(index);
             LevelManager.instance.SetIndexMap(++index);
-            LevelManager.Ins.LVOnInit();
 
-            gameManager.instance.SetCheckFinish(true);
+            LevelManager.Ins.LVOnInit();
+            Time.timeScale = 1f;
 
             UIManager.Ins.OpenUI<MainMenu>();
         }
+    }
+    public void SettingButton()
+    {
+        Close(0);
+        UIManager.Ins.OpenUI<Set>();
+        UIManager.Ins.SetLastCanvas(this);
     }
 }

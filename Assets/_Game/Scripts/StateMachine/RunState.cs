@@ -6,9 +6,8 @@ public class RunState : IState
 {
     public void OnStart(Bot bot)
     {
-        if(bot.getCount() >= 15)
+        if(bot.getCount() >= bot.getNeedAmount())
         {
-            Debug.Log("up stair");
             bot.goToFinish();
         }
         else

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -10,7 +11,7 @@ public class Character : MonoBehaviour
     [SerializeField] protected Animator anim;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected float speed;
-
+    [SerializeField] protected GameObject skin;
     public static Character instance { get; private set; }
 
     protected List<CharacterBrick> characterBricks = new List<CharacterBrick>();
@@ -30,6 +31,7 @@ public class Character : MonoBehaviour
     public void setColor(ColorEnum chosenColor)
     {
         rd = GetComponent<Renderer>();
+        skin.GetComponent<Renderer>().material = LevelManager.instance.colorData.GetColorData(chosenColor);
         rd.material = LevelManager.instance.colorData.GetColorData(chosenColor);
         color = chosenColor;
     }
@@ -46,7 +48,7 @@ public class Character : MonoBehaviour
 
     protected void OnTriggerEnter(Collider other)
     {
-        Brick brick = Dictionary.instance.vachamBrick(other);
+        Brick brick = CacheDictionary.instance.vachamBrick(other);
         if(brick != null)
         {
             if (brick.color == color)
@@ -61,9 +63,38 @@ public class Character : MonoBehaviour
                 characterBricks.Add(characterBrick);
             }
         }
-
+        if(other.gameObject.CompareTag(Constants.tagFinalGoal))
+        {
+            int index = LevelManager.instance.GetIndexMap();
+            Debug.Log("indexCurMap: " + index);
+            if (index < 2)
+            {
+                if (gameObject.CompareTag(Constants.tagPlayer))
+                {
+                    gameManager.Ins.Victory();
+                }
+                else if (gameObject.CompareTag(Constants.tagBot))
+                {
+                    gameManager.Ins.Defeat();
+                }
+                LevelManager.instance.SetIndexMap(index++);
+            }
+            else
+            {
+                Time.timeScale = 0f;
+                UIManager.Ins.CloseAll();
+                if (gameObject.CompareTag(Constants.tagPlayer))
+                {
+                    gameManager.Ins.Victory();
+                }
+                else if (gameObject.CompareTag(Constants.tagBot))
+                {
+                    gameManager.Ins.Defeat();
+                }
+                UIManager.Ins.OpenUI<TextEG>();
+            }
+        }
     }
-
     protected void OnCollisionEnter(Collision other)
     {
         if(other.gameObject.CompareTag(Constants.tagStair))
@@ -72,5 +103,5 @@ public class Character : MonoBehaviour
         }
     }
     public virtual void OnBridge(Collider item){}
-
+    public virtual void SetActive(bool active) { }
 }

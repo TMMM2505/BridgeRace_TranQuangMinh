@@ -6,19 +6,21 @@ using UnityEngine;
 public class LevelManager : Singleton<LevelManager>
 {
     public static LevelManager instance;
-
+ 
+    [SerializeField] private Joystick js;
     [SerializeField] private Map[] maps = new Map[3];
+    [SerializeField] private GameObject[] startPoint = new GameObject[4];
 
     [SerializeField] private Finish finalGoal;
 
     [SerializeField] private Material noneMaterial;
 
-    [SerializeField] private Player player;
-    [SerializeField] private Bot bot;
+    [SerializeField] private Player prefabPlayer;
+    [SerializeField] private Bot prefabBot;
 
     public ColorData colorData;
 
-    private List<Bot> listBot = new List<Bot>();
+    private List<Character> listCharacter = new List<Character>();
     private int index = -1;
     private void Awake()
     {
@@ -34,18 +36,28 @@ public class LevelManager : Singleton<LevelManager>
         maps[index].SetActiveMap(true);
         maps[index].SetPlatform();
         SetColorForCharacter();
-        player.SetActive(false);
     }
     public void SetColorForCharacter()
     {
-        player.setColor((ColorEnum)1);
-        for (int i = 2; i <= 4; i++)
+        bool setPlayer = true;
+        for (int i = 1; i <= 4; i++)
         {
-            Bot ibot = bot;
-            ibot = Instantiate(ibot, new Vector3(i * 2, -3f, -10f), Quaternion.identity);
-            listBot.Add(ibot);
-            ibot.OnInit((ColorEnum)i, maps[index], finalGoal.transform.position);
-            bot.SetActive(false);
+            if(setPlayer)
+            {
+                Player iPlayer = prefabPlayer;
+                iPlayer = Instantiate(prefabPlayer, startPoint[i-1].transform.position, Quaternion.identity);
+                iPlayer.OnInit(startPoint[i-1].transform.position, js, (ColorEnum)i);
+                setPlayer = false;
+                listCharacter.Add(iPlayer);
+            }
+            else
+            {
+                Bot ibot = prefabBot;
+                ibot = Instantiate(prefabBot, startPoint[i-1].transform.position, Quaternion.identity);
+                ibot.OnInit((ColorEnum)i, maps[index], finalGoal.transform.position);
+                ibot.SetActive(false);
+                listCharacter.Add(ibot);
+            }
         }
     }
 
@@ -53,24 +65,23 @@ public class LevelManager : Singleton<LevelManager>
     {
         return maps[index].getPlatform();
     }
-    private void ClearBot()
+    private void ClearCharacter()
     {
-        for (int i = 0; i < listBot.Count; i++)
+        for (int i = 0; i < listCharacter.Count; i++)
         {
-            Destroy(listBot[i].gameObject);
+            Destroy(listCharacter[i].gameObject);
         }
-        listBot.Clear();
+        listCharacter.Clear();
     }
     public void ResetLV()
     {
-        ClearBot();
+        ClearCharacter();
         maps[index].ClearMap();
-        foreach (KeyValuePair<Collider, Stair> subDic in Dictionary.instance.listStair)
+        foreach (KeyValuePair<Collider, Stair> subDic in CacheDictionary.instance.listStair)
         {
             Stair item = subDic.Value;
             item.ChangeColor(noneMaterial);
         }
-        player.OnInit();
     }
     public int GetIndexMap()
     {
@@ -87,10 +98,10 @@ public class LevelManager : Singleton<LevelManager>
 
     public void SetActiveChar(bool active)
     {
-        player.SetActive(active);
-        for(int i = 0; i < listBot.Count; i++)
+        prefabPlayer.SetActive(active);
+        for(int i = 0; i < listCharacter.Count; i++)
         {
-            listBot[i].SetActive(active);
+            listCharacter[i].SetActive(active);
         }
     }
 }

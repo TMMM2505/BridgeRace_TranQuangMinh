@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Dictionary : MonoBehaviour
+public class CacheDictionary : MonoBehaviour
 {
-    public static Dictionary instance;
+    public static CacheDictionary instance;
     public Dictionary<Collider, Brick> listBrick = new Dictionary<Collider, Brick>();
     public Dictionary<Collider, Stair> listStair = new Dictionary<Collider, Stair>();
 
