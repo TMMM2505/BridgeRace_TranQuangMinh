@@ -20,6 +20,7 @@ public class LevelManager : Singleton<LevelManager>
 
     public ColorData colorData;
 
+    private List<ColorEnum> listColor = new List<ColorEnum>();
     private List<Character> listCharacter = new List<Character>();
     private int index = -1;
     private void Awake()
@@ -33,9 +34,11 @@ public class LevelManager : Singleton<LevelManager>
     }
     public void LVOnInit()
     {
+        SetListColor();
         maps[index].SetActiveMap(true);
         maps[index].SetPlatform();
         SetColorForCharacter();
+        SetActiveChar(false);
     }
     public void SetColorForCharacter()
     {
@@ -46,7 +49,7 @@ public class LevelManager : Singleton<LevelManager>
             {
                 Player iPlayer = prefabPlayer;
                 iPlayer = Instantiate(prefabPlayer, startPoint[i-1].transform.position, Quaternion.identity);
-                iPlayer.OnInit(startPoint[i-1].transform.position, js, (ColorEnum)i);
+                iPlayer.OnInit(startPoint[i-1].transform.position, js, GetRandomCL());
                 setPlayer = false;
                 listCharacter.Add(iPlayer);
             }
@@ -54,16 +57,33 @@ public class LevelManager : Singleton<LevelManager>
             {
                 Bot ibot = prefabBot;
                 ibot = Instantiate(prefabBot, startPoint[i-1].transform.position, Quaternion.identity);
-                ibot.OnInit((ColorEnum)i, maps[index], finalGoal.transform.position);
+                ibot.OnInit(GetRandomCL(), maps[index], finalGoal.transform.position);
                 ibot.SetActive(false);
                 listCharacter.Add(ibot);
             }
         }
-    }
 
+    }
+    private ColorEnum GetRandomCL()
+    {
+        int rand = Random.Range(0, listColor.Count);
+        ColorEnum selectedCl = listColor[rand];
+        listColor.RemoveAt(rand);
+        return selectedCl;
+    }
     public Platform[] DefinePlatform()
     {
         return maps[index].getPlatform();
+    }
+    private void SetListColor()
+    {
+        foreach(ColorEnum item in System.Enum.GetValues(typeof(ColorEnum)))
+        {
+            if(item != ColorEnum.None)
+            {
+                listColor.Add(item);
+            }
+        }
     }
     private void ClearCharacter()
     {

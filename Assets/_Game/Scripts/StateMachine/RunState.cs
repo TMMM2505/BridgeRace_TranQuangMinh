@@ -14,10 +14,11 @@ public class RunState : IState
         {
             bot.FindMinTarget();
         }
+        bot.Move();
     }
     public void OnExecute(Bot bot)
     {
-        bot.Move();
+        bot.ChangeState(new RunState());
     }
     public void OnExit(Bot bot)
     {

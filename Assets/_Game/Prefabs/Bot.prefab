@@ -964,10 +964,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d56b83f254d37c44a1819bd8afaa21c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  poolType: 0
+  skin: {fileID: 3053163503780375121}
   anim: {fileID: 3259070621421202788}
   rb: {fileID: 4673362029122186859}
   speed: 5
-  skin: {fileID: 3053163503780375121}
   platformLayer:
     serializedVersion: 2
     m_Bits: 8

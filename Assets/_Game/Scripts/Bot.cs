@@ -33,8 +33,7 @@ public class Bot : Character
     {
         rd = GetComponent<Renderer>();
         agent.speed = speed;
-        ChangeState(new RunState());
-        //FindPlatform();
+        ChangeState(new IdleState());
     }
     private void Update()
     {
@@ -56,6 +55,92 @@ public class Bot : Character
         else
         {
             currentState.OnExit(this);
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        base.OnTriggerEnter(other);
+        Brick brick = CacheDictionary.instance.vachamBrick(other);
+
+        if(brick != null)
+        {
+            if (brick.color == color)
+            {
+                targetBrick[savingIndex] += new Vector3(999f, 999f, 999f);
+                StartCoroutine(ReAppear(3f, savingIndex));
+                FindMinTarget();
+            }
+        }
+        
+        if (other.gameObject.CompareTag(Constants.tagFinalGoal))
+        {
+            ChangeState(new IdleState());
+        }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (other.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct < 0f)
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag(Constants.tagDoor) && touchDoor)
+        {
+            touchDoor = false;
+            // chuyen platform
+            targetBrick.Clear();
+            for (int i = 0; i < currentPlatform.getTarget().Count; i++)
+            {
+                Brick item = currentPlatform.getTarget()[i];
+                if (item.color == color)
+                {
+                    targetBrick.Add(currentPlatform.getTarget()[i].transform.position);
+                }
+            }
+            savingCount = 0;
+            ChangeState(new RunState());
+            other.GetComponent<BoxCollider>().isTrigger = false;
+        }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (other.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct > 0f)
+            {
+                other.GetComponent<BoxCollider>().isTrigger = false;
+            }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        base.OnCollisionEnter(collision);
+        if (collision.gameObject.CompareTag(Constants.tagPlatform1))
+        {
+            currentPlatform = currentMap.getPlatform()[0];
+        }
+        else if (collision.gameObject.CompareTag(Constants.tagPlatform2))
+        {
+            currentPlatform = currentMap.getPlatform()[1];
+        }
+
+        Vector3 velocity = agent.velocity;
+        Vector3 movementDirectionNormalized = velocity.normalized;
+        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
+        if (collision.gameObject.CompareTag(Constants.tagDoor))
+        {
+            if (dotProduct > 0f)
+            {
+                collision.collider.GetComponent<BoxCollider>().isTrigger = true;
+            }
         }
     }
     public void OnInit(ColorEnum color, Map map, Vector3 finalGoal)
@@ -152,98 +237,15 @@ public class Bot : Character
             currentState.OnStart(this);
         }
     }
-
-    private void OnTriggerEnter(Collider other)
+    public Vector3 GetGoal()
     {
-        base.OnTriggerEnter(other);
-        Brick brick = CacheDictionary.instance.vachamBrick(other);
-
-        if(brick != null)
-        {
-            if (brick.color == color)
-            {
-                targetBrick[savingIndex] += new Vector3(999f, 999f, 999f);
-                StartCoroutine(ReAppear(3f, savingIndex));
-                FindMinTarget();
-            }
-        }
-        
-        if (other.gameObject.CompareTag(Constants.tagFinalGoal))
-        {
-            ChangeState(new IdleState());
-        }
-
-        Vector3 velocity = agent.velocity;
-        Vector3 movementDirectionNormalized = velocity.normalized;
-        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
-        if (other.gameObject.CompareTag(Constants.tagDoor))
-        {
-            if (dotProduct < 0f)
-            {
-                other.GetComponent<BoxCollider>().isTrigger = false;
-            }
-        }
+        return goal;
     }
 
     IEnumerator ReAppear(float time, int index)
     {
         yield return new WaitForSeconds(time);
         targetBrick[index] -= new Vector3(999f, 999f, 999f);
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.CompareTag(Constants.tagDoor) && touchDoor)
-        {
-            touchDoor = false;
-            // chuyen platform
-            targetBrick.Clear();
-            for (int i = 0; i < currentPlatform.getTarget().Count; i++)
-            {
-                Brick item = currentPlatform.getTarget()[i];
-                if (item.color == color)
-                {
-                    targetBrick.Add(currentPlatform.getTarget()[i].transform.position);
-                }
-            }
-            savingCount = 0;
-            ChangeState(new RunState());
-            other.GetComponent<BoxCollider>().isTrigger = false;
-        }
-
-        Vector3 velocity = agent.velocity;
-        Vector3 movementDirectionNormalized = velocity.normalized;
-        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
-        if (other.gameObject.CompareTag(Constants.tagDoor))
-        {
-            if (dotProduct > 0f)
-            {
-                other.GetComponent<BoxCollider>().isTrigger = false;
-            }
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        base.OnCollisionEnter(collision);
-        if (collision.gameObject.CompareTag(Constants.tagPlatform1))
-        {
-            currentPlatform = currentMap.getPlatform()[0];
-        }
-        else if (collision.gameObject.CompareTag(Constants.tagPlatform2))
-        {
-            currentPlatform = currentMap.getPlatform()[1];
-        }
-
-        Vector3 velocity = agent.velocity;
-        Vector3 movementDirectionNormalized = velocity.normalized;
-        float dotProduct = Vector3.Dot(movementDirectionNormalized, transform.forward);
-        if (collision.gameObject.CompareTag(Constants.tagDoor))
-        {
-            if (dotProduct > 0f)
-            {
-                collision.collider.GetComponent<BoxCollider>().isTrigger = true;
-            }
-        }
     }
     public override void SetActive(bool active)
     {

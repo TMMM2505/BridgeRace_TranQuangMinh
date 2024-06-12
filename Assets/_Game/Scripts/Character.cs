@@ -6,12 +6,12 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Character : MonoBehaviour
+public class Character : GameUnit
 {
+    [SerializeField] protected GameObject skin;
     [SerializeField] protected Animator anim;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected float speed;
-    [SerializeField] protected GameObject skin;
     public static Character instance { get; private set; }
 
     protected List<CharacterBrick> characterBricks = new List<CharacterBrick>();
